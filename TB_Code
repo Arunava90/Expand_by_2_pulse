@@ -1,0 +1,45 @@
+module expand_by_2_pulse_tb();
+
+    reg data_i, clk_i, rst_i;
+    wire out_o;
+    wire [7:0] count_o;
+    wire [1:0] state_o;
+    
+    expand_by_2_pulse u_expand_by_2_pulse (data_i, clk_i, rst_i, out_o, count_o, state_o);
+   
+    always begin
+        clk_i = 1'b0;
+        #5;
+        clk_i = ~clk_i;
+        #5;
+    end
+    
+    initial begin
+        rst_i = 1'b1;
+        data_i = 1'b0;
+        #22;
+        rst_i = 1'b0;
+        #17;
+        rst_i = 1'b1;
+        #30 data_i = 1'b1;
+        #20 data_i = 1'b0;
+        #80 data_i = 1'b1;
+        #40 data_i = 1'b0;
+        #200 data_i = 1'b1;
+        #20 data_i = 1'b0;
+        #70 data_i = 1'b1;
+        #10 data_i = 1'b0;
+        #10 data_i = 1'b1;
+        #10 data_i = 1'b0;
+        #56;
+        rst_i = 1'b0;
+        #40 $finish();
+    end 
+    
+    // Dump VCD
+    initial begin
+        $dumpfile ("expand_by_2_pulse.vcd");
+        $dumpvars (0, expand_by_2_pulse_tb);
+    end
+
+endmodule
