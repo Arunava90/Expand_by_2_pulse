@@ -1,0 +1,76 @@
+module expand_by_2_pulse(
+    input logic data_i,
+    input logic clk_i, rst_i,
+    output logic out_o,
+    output logic [7:0] count_o,
+    output logic [1:0] state_o
+    );
+    
+    logic [7:0] count;
+    
+    parameter idle = 2'b00;
+    parameter increment = 2'b01;
+    parameter reduction = 2'b10;
+    
+    logic [1:0] state, next_state;
+    
+    always@ (posedge clk_i) begin
+        if (~rst_i)
+            state<=idle;
+        else
+            state<=next_state;
+    end
+    
+    always@ (state, data_i, count) begin
+        case (state)
+        idle      : begin
+                        if (data_i)
+                            next_state = increment ;
+                        else
+                            next_state = idle;                
+                    end
+        increment : begin
+                        if (data_i)
+                            next_state = increment ;
+                        else
+                            next_state = reduction ;                                             
+                    end
+        reduction : begin       
+                        if (data_i)
+                            next_state = increment ;
+                        else begin
+                            if (count == 1)
+                                next_state = idle ;
+                            else
+                                next_state = reduction;
+                        end
+                    end
+        default : next_state = idle ;
+        endcase
+    end
+    
+    always@ (posedge clk_i) begin
+        case (state)
+        idle: begin
+            out_o <= 1'b0;
+            count <= 'b0;
+        end
+        increment: begin
+            out_o <= 1'b1;
+            count <= count + 2;
+        end
+        reduction: begin
+            out_o <= 1'b1;
+            count <= count - 1;
+        end
+        default: begin
+            out_o <= 1'b0;
+            count <= 'b0;
+        end
+        endcase
+    end
+        
+    assign count_o = count;
+    assign state_o = state;
+    
+endmodule
